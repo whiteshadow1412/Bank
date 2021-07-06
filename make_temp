@@ -2,7 +2,7 @@
 CCC			= gcc
 
 # folders contain header files
-INCLUDE		=
+INCLUDE		= ~/trungct/complex
 
 # The CFLAGS variable sets compile flags for gcc:
 #  -g          compile with debug information
@@ -10,66 +10,60 @@ INCLUDE		=
 #  -O0         do not optimize generated code
 #  -std=gnu99  use the GNU99 standard language definition
 CCFLAGS		= -g -Wall -O0 -std=gnu99
-CCFLAGS     += ${INCLUDE}
+CCFLAGS     += -I.
 
 # paths of library
-LIBPATHS = lib
+LIBPATHS = 
+HEADERS = Complex.h
+#CCFLAGS  += $(HEADERS)
 
 # libraries
-LIBS = 
+LIBS = -lm 
 
 # The LDFLAGS variable sets flags for linker
 LDFLAGS = ${LIBPATHS} ${LIBS}
 
-SOCDIR          = 
-OBJDIR          = 
-LMFDIR          = 
+SOCDIR          = ~/trungct/complex
+OBJDIR          = ~/trungct/complex
+LMFDIR          = ~/trungct/complex
 
-PRGSOC      =
+PRGSOC      = Complex.c main.c
 
-PRGOBJ          = $(PRGSOC:.c=.o)
-PRGLMF          = $(PRGSOC:.c=.exe)
-PRGNAM          = $(PRGSOC:.c=)
-
+PRGOBJ          = $(PRGSOC:%.c=$(OBJDIR)/%.o)
+PRGLMF          = Complex.exe
 ###############################################################################
 #
 # 暗黙のルール追加
 #
 #.SUFFIXES:      .cpp .cpp~ .cpp .cpp~ $(SUFFIXES)
 .SUFFIXES:
-$(OBJDIR)%.o:$(SOCDIR)%.cpp
-                @echo make object: $(*F).o
-                @$(CCC) -c -g $(SOCDIR)/$(*F).cpp $(CCFLAGS) -o $(OBJDIR)/$(*F).o
-$(LMFDIR)%.exe:$(OBJDIR)%.o
-                @echo make object: $(*F).exe
-                @rm -f $(LMFDIR)/$(*F).exe
-                @$(CCC) $(OBJDIR)/$(*F).o -o $(LMFDIR)/$(*F).exe $(LDFLAGS)
+$(OBJDIR)%.o:$(SOCDIR)%.c $(HEADERS)
+		@echo make object: $(*F).o
+		@$(CCC)  $(CCFLAGS) -o $(OBJDIR)/$(*F).o -c $<
+$(LMFDIR)/$(PRGLMF):$(PRGOBJ)
+		@echo make object: $(PRGLMF)
+		@rm -f $(LMFDIR)/$(PRGLMF)
+		@$(CCC) $^ -o $(LMFDIR)/$(PRGLMF)  $(LDFLAGS)
 ###############################################################################
 #
 # ガイド表示
 #
 guide:
-                @echo "Usage: make <ﾀｰｹﾞｯﾄ>..."
-                @echo "       <ﾀｰｹﾞｯﾄ> all          : 日付ﾁｪｯｸ後全exe生成"
-                @echo "                clean        : *.exe *.o core 削除"
-                @echo "                ﾌﾟﾛｸﾞﾗﾑ名    : ～.exe生成"
-                @echo "                ﾌﾟﾛｸﾞﾗﾑ名.o  : ～.o生成"
+		@echo "Usage: make <ﾀｰｹﾞｯﾄ>..."
+		@echo "       <ﾀｰｹﾞｯﾄ> all          : 日付ﾁｪｯｸ後全exe生成"
+		@echo "                clean        : *.exe *.o core 削除"
+		@echo "                ﾌﾟﾛｸﾞﾗﾑ名    : ～.exe生成"
+		@echo "                ﾌﾟﾛｸﾞﾗﾑ名.o  : ～.o生成"
 ###############################################################################
 # MOD Rev.P64 S
 all:            $(LMFDIR)/$(PRGLMF)
 # MOD Rev.P64 E
 
 ###############################################################################
-#
-#  ロードモジュールファイル生成（プロセス）
-#
-$(PRGNAM):      $(LMFDIR)/$$@.exe
-$(PRGLMF):      $(LMFDIR)/$$@
-$(PRGOBJ):      $(OBJDIR)/$$@
-###############################################################################
 # ファイル削除
 #
 clean:
-        -@rm -f $(OBJDIR)/%.o core
-        -@rm -f $(LMFDIR)/%.exe core
+		@rm -f $(PRGOBJ) core
+		@rm -f $(LMFDIR)/$(PRGLMF) core
+
 
