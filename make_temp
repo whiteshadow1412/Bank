@@ -1,0 +1,75 @@
+# The default C compiler
+CCC			= gcc
+
+# folders contain header files
+INCLUDE		=
+
+# The CFLAGS variable sets compile flags for gcc:
+#  -g          compile with debug information
+#  -Wall       give verbose compiler warnings
+#  -O0         do not optimize generated code
+#  -std=gnu99  use the GNU99 standard language definition
+CCFLAGS		= -g -Wall -O0 -std=gnu99
+CCFLAGS     += ${INCLUDE}
+
+# paths of library
+LIBPATHS = lib
+
+# libraries
+LIBS = 
+
+# The LDFLAGS variable sets flags for linker
+LDFLAGS = ${LIBPATHS} ${LIBS}
+
+SOCDIR          = 
+OBJDIR          = 
+LMFDIR          = 
+
+PRGSOC      =
+
+PRGOBJ          = $(PRGSOC:.c=.o)
+PRGLMF          = $(PRGSOC:.c=.exe)
+PRGNAM          = $(PRGSOC:.c=)
+
+###############################################################################
+#
+# 暗黙のルール追加
+#
+#.SUFFIXES:      .cpp .cpp~ .cpp .cpp~ $(SUFFIXES)
+.SUFFIXES:
+$(OBJDIR)%.o:$(SOCDIR)%.cpp
+                @echo make object: $(*F).o
+                @$(CCC) -c -g $(SOCDIR)/$(*F).cpp $(CCFLAGS) -o $(OBJDIR)/$(*F).o
+$(LMFDIR)%.exe:$(OBJDIR)%.o
+                @echo make object: $(*F).exe
+                @rm -f $(LMFDIR)/$(*F).exe
+                @$(CCC) $(OBJDIR)/$(*F).o -o $(LMFDIR)/$(*F).exe $(LDFLAGS)
+###############################################################################
+#
+# ガイド表示
+#
+guide:
+                @echo "Usage: make <ﾀｰｹﾞｯﾄ>..."
+                @echo "       <ﾀｰｹﾞｯﾄ> all          : 日付ﾁｪｯｸ後全exe生成"
+                @echo "                clean        : *.exe *.o core 削除"
+                @echo "                ﾌﾟﾛｸﾞﾗﾑ名    : ～.exe生成"
+                @echo "                ﾌﾟﾛｸﾞﾗﾑ名.o  : ～.o生成"
+###############################################################################
+# MOD Rev.P64 S
+all:            $(LMFDIR)/$(PRGLMF)
+# MOD Rev.P64 E
+
+###############################################################################
+#
+#  ロードモジュールファイル生成（プロセス）
+#
+$(PRGNAM):      $(LMFDIR)/$$@.exe
+$(PRGLMF):      $(LMFDIR)/$$@
+$(PRGOBJ):      $(OBJDIR)/$$@
+###############################################################################
+# ファイル削除
+#
+clean:
+        -@rm -f $(OBJDIR)/%.o core
+        -@rm -f $(LMFDIR)/%.exe core
+
