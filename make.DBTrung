@@ -1,0 +1,115 @@
+#ident "@(#)Makefile    0.1 "
+#/*--------------------------------------------------------------------*/
+#/*                                                                    */
+#/*     Makefile : ロードモジュール作成サンプル                        */
+#/*                                                                    */
+#/*              Designed by TDST Y.uemura  2003-09-20   Ver. 0.00     */
+#/*              Coded    by TDST Y.uemura  2003-09-20   Ver. 0.00     */
+#/*              Revised  by                                           */
+#/*                                                                    */
+#/*     power Dispatch and Transmission Computer Control Designing     */
+#/*     Group TOSHIBA FUCHU WORKS.                                     */
+#/*                                                                    */
+#/*     (C)COPYRIGHT 2003 BY TOSHIBA CORPORATION ALL RIGHTS RESERVED   */
+#/*                                                                    */
+#/*--------------------------------------------------------------------*/
+# *
+# *** ここから新総制 ***
+# * 
+# * Rev.q001       20/07/28 承認：     調査：     担当：TSDV DamNK
+# *   変更理由：（製品履歴番号：XQ100-000）新総制対応
+# *     libctCmmu.soの追加(PpmCtWakePara)
+# *
+CCC		= gcc
+INCLUDE		= -I${DHOME} -I${DWCSHOME}/include -I${PACEHOME}/include
+INCLUDE         += -I${OSVDMSWRAP_HOME}/include
+CCFLAGS		+= -g ${INCLUDE} -D_POSIX_C_SOURCE=199506L -D_XOPEN_SOURCE=500
+LIBPATHS	= -L${DHOME}/DSUBK
+# ADD Rev.P64->P32 S
+LIBPATHS       += -L${DHOME}/DSUB -L${OSVDMSWRAP_HOME}/lib -L${DHOME}/DSUBOPC \
+ 		  -L${DHOME}/DSUBMW -L${PACEHOME}/lib 
+# ADD Rev.P64->P32 E
+LIBS		= -lafGiproma -laaCommon -la0Gui -lagGremcastCmmu -laiCmmu
+LIBS		+= -lDWCSAPI  -losvdmswrap
+LIBS		+= -lMW2olv -lMW2date -lMW2bit -lMW2etc
+LIBS            += -ladCDSNE -lMW2opc -lsubdo
+LIBS		+= -ldms -lscl -lscldgs -liconv
+LIBS		+= -lsubda -lcppda -lsubdb -lsubdc -lsubdcex1 -lsubdf
+LIBS		+= -lsubdg -lsubdp -lsubdl -lsubdz -lcppdz -lsubzsta
+LIBS		+= -lsubdc1
+# ADD Rev.q001 S
+LIBS            += -lctCmmu
+# ADD Rev.q001 E
+F95LIB          = -lsubdgF90
+## 計算機モード取得
+LDFLAGS		+= ${LIBPATHS} ${LIBS} ${F95LIB}
+###############################################################################
+#
+# ソース、c/fortranソース、オブジェクト、ライブラリ ディレクトリ
+#
+SOCDIR		= $(DHOME)/DWKC/kuan/tool
+OBJDIR		= $(DHOME)/DWKC/kuan/tool
+LMFDIR		= $(DHOME)/DWKC/kuan/tool
+###############################################################################
+#
+# ロードモジュール名
+#
+PRGSOC		= DBTrung.c
+CMDSOC		= 
+#
+PRGOBJ		= $(PRGSOC:.c=.o)
+PRGLMF		= $(PRGSOC:.c=.exe)
+PRGNAM		= $(PRGSOC:.c=)
+CMDOBJ		= $(CMDSOC:.c=.o)
+CMDLMF		= $(CMDSOC:.c=.exe)
+CMDNAM		= $(CMDSOC:.c=)
+###############################################################################
+#
+# 暗黙のルール追加
+#
+#.SUFFIXES:      .cpp .cpp~ .cpp .cpp~ $(SUFFIXES)
+.SUFFIXES:
+$(OBJDIR)%.o:$(SOCDIR)%.c
+		@echo make object: $(*F).o
+		@$(CCC) -c -g $(SOCDIR)/$(*F).c $(CCFLAGS) -o $(OBJDIR)/$(*F).o
+$(LMFDIR)%.exe:$(OBJDIR)%.o
+		@echo make object: $(*F).exe
+		@rm -f $(LMFDIR)/$(*F).exe
+		@$(CCC) $(OBJDIR)/$(*F).o -o $(LMFDIR)/$(*F).exe $(CCFLAGS) $(LDFLAGS)
+###############################################################################
+#
+# ガイド表示
+#
+guide:
+		@echo "Usage: make <ﾀｰｹﾞｯﾄ>..."
+		@echo "       <ﾀｰｹﾞｯﾄ> all          : 日付ﾁｪｯｸ後全exe生成"
+		@echo "                clean        : *.exe *.o core 削除"
+		@echo "                ﾌﾟﾛｸﾞﾗﾑ名    : 〜.exe生成"
+		@echo "                ﾌﾟﾛｸﾞﾗﾑ名.o  : 〜.o生成"
+###############################################################################
+# MOD Rev.P64 S
+#all:           $(PRGLMF) $(CMDLMF)
+all:            $(LMFDIR)/$(PRGLMF) $(LMFDIR)/$(CMDLMF)
+# MOD Rev.P64 E
+
+###############################################################################
+#
+#  ロードモジュールファイル生成（プロセス）
+#
+$(PRGNAM):	$(LMFDIR)/$$@.exe
+$(PRGLMF):	$(LMFDIR)/$$@
+$(PRGOBJ):	$(OBJDIR)/$$@
+###############################################################################
+#
+#  ロードモジュールファイル生成（コマンド）
+#
+$(CMDNAM):	$(LMFDIR)/$$@.exe
+$(CMDLMF):	$(LMFDIR)/$$@
+$(CMDOBJ):	$(OBJDIR)/$$@
+###############################################################################
+#
+# ファイル削除
+#
+clean:
+	-@rm -f $(OBJDIR)/DBTrung.o core
+	-@rm -f $(LMFDIR)/DBTrung.exe core
